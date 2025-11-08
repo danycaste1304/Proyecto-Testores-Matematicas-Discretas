@@ -5,8 +5,9 @@
 using namespace std;
 
 int main() {
+    /*
     int filas, columnas;
-
+    
     // Pedir dimensiones al usuario
     cout << "Ingrese el numero de filas (maximo 100): ";
     cin >> filas;
@@ -29,6 +30,19 @@ int main() {
             matriz[i][j] = rand() % 2; // Genera 0 o 1
         }
     }
+    */
+
+    int filas = 6;
+    int columnas = 5;
+
+   vector<vector<int>> matriz = {
+        {0, 0, 1, 0, 0},
+        {1, 1, 0, 0, 0},
+        {1, 0, 1, 0, 0},
+        {0, 1, 0, 0, 0},
+        {0, 1, 0, 1, 0},
+        {1, 0, 1, 1, 0}
+    };
 
     // Mostrar la matriz
     cout << "\nMatriz booleana generada aleatoriamente:\n";
@@ -38,4 +52,77 @@ int main() {
         }
         cout << endl;
     }
+
+    //Convertir en matriz básica
+   vector<bool> basicas(filas, true);
+
+    // Recorrer cada fila i
+    for (int i = 0; i < filas; i++) {
+
+        //si ya fue eliminada, no la comparamos
+        if (!basicas[i]) continue;
+
+        // la comparamos con las filas que vienen después
+        for (int k = 0; k < filas; k++) {
+            if (!basicas[k]||k==i) continue;
+
+            bool hayDeterminante = false;
+
+    // AQUÍ cambiamos: revisamos columnas de 2 en 2 (c y c+1)
+            for (int c = 0; c < columnas - 1; c++) {
+                int a1 = matriz[i][c];
+                int b1 = matriz[k][c];
+                int a2 = matriz[i][c+1];
+                int b2 = matriz[k][c+1];
+
+                // patrón 0,1 seguido de 1,0
+                bool pat1 = (a1 == 0 && b1 == 1) && (a2 == 1 && b2 == 0);
+                // patrón 1,0 seguido de 0,1
+                bool pat2 = (a1 == 1 && b1 == 0) && (a2 == 0 && b2 == 1);
+
+                if (pat1 || pat2) {
+                    hayDeterminante = true;
+                    break;  // ya encontramos, no hace falta seguir
+                }
+            }
+
+            if (hayDeterminante) {
+                // no se elimina ninguna de las dos, pero seguimos comparando i con la que sigue
+                continue;
+            }
+           
+            // si NO hay determinante, entonces una contiene a la otra.
+            bool iContieneK = true;
+            bool kContieneI = true;
+
+            for (int c = 0; c < columnas; c++) {
+                if (matriz[i][c] < matriz[k][c]) {
+                    iContieneK = false;
+                }
+                if (matriz[k][c] < matriz[i][c]) {
+                    kContieneI = false;
+                }
+            }
+
+            if (iContieneK && !kContieneI) {
+                basicas[i] = false;
+                break;      // ya no comparo i con más, porque i murió
+            } else if (kContieneI && !iContieneK) {
+                basicas[k] = false;
+                // i sigue viva, entonces sigo con el siguiente k
+            } 
+        }
+    }
+
+    // Mostrar la matriz básica (solo filas vivas)
+    cout << "\nMatriz basica (filas que sobrevivieron):\n";
+    for (int i = 0; i < filas; i++) {
+        if (!basicas[i]) continue;
+        for (int j = 0; j < columnas; j++) {
+            cout << matriz[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    return 0;
 }
