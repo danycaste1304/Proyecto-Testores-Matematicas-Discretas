@@ -32,17 +32,19 @@ int main() {
     }
     */
 
-    int filas = 6;
-    int columnas = 5;
+    int filas = 7;
+    int columnas = 6;
 
    vector<vector<int>> matriz = {
-        {0, 0, 1, 0, 0},
-        {1, 1, 0, 0, 0},
-        {1, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 1, 0},
-        {1, 0, 1, 1, 0}
+        {1, 0, 1, 0, 1, 0},
+        {1, 1, 0, 0, 1, 0},
+        {0, 1, 1, 0, 1, 1},
+        {1, 0, 0, 1, 0, 1},
+        {0, 1, 0, 1, 1, 0},
+        {1, 0, 1, 0, 0, 1},
+        {0, 1, 1, 1, 0, 0}
     };
+
 
     // Mostrar la matriz
     cout << "\nMatriz booleana generada aleatoriamente:\n";
@@ -116,7 +118,7 @@ int main() {
     // Mostrar la matriz básica y calcular densidad
     float filas_den=0;
     float unos=0;
-    cout << "\nMatriz basica (filas que sobrevivieron):\n";
+    cout << "\nMatriz basica:\n";
     for (int i = 0; i < filas; i++) {
         if (!basicas[i]) continue;
         filas_den++;
