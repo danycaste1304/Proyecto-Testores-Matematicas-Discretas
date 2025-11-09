@@ -5,7 +5,7 @@
 using namespace std;
 
 int main() {
-    /*
+
     int filas, columnas;
     
     // Pedir dimensiones al usuario
@@ -30,19 +30,6 @@ int main() {
             matriz[i][j] = rand() % 2; // Genera 0 o 1
         }
     }
-    */
-
-    int filas = 6;
-    int columnas = 5;
-
-   vector<vector<int>> matriz = {
-        {0, 0, 1, 0, 0},
-        {1, 1, 0, 0, 0},
-        {1, 0, 1, 0, 0},
-        {0, 1, 0, 0, 0},
-        {0, 1, 0, 1, 0},
-        {1, 0, 1, 1, 0}
-    };
 
     // Mostrar la matriz
     cout << "\nMatriz booleana generada aleatoriamente:\n";
@@ -94,6 +81,7 @@ int main() {
             // si NO hay determinante, entonces una contiene a la otra.
             bool iContieneK = true;
             bool kContieneI = true;
+            bool iguales = true;
 
             for (int c = 0; c < columnas; c++) {
                 if (matriz[i][c] < matriz[k][c]) {
@@ -102,12 +90,15 @@ int main() {
                 if (matriz[k][c] < matriz[i][c]) {
                     kContieneI = false;
                 }
+                if (matriz[i][c] != matriz[k][c]) {
+                    iguales = false;
+                }
             }
 
             if (iContieneK && !kContieneI) {
                 basicas[i] = false;
                 break;      
-            } else if (kContieneI && !iContieneK) {
+            } else if ((kContieneI && !iContieneK)||(iguales)) {
                 basicas[k] = false;
             } 
         }
@@ -116,7 +107,7 @@ int main() {
     // Mostrar la matriz básica y calcular densidad
     float filas_den=0;
     float unos=0;
-    cout << "\nMatriz basica (filas que sobrevivieron):\n";
+    cout << "\nMatriz basica:\n";
     for (int i = 0; i < filas; i++) {
         if (!basicas[i]) continue;
         filas_den++;
@@ -129,7 +120,7 @@ int main() {
         cout << endl;
     }
 
-    cout << endl;
+    cout<<endl;
     float densidad;
     densidad=unos/(filas_den*columnas);
     cout<<"Densidad: "<<densidad<<endl;
