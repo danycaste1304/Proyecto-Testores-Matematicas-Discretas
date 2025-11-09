@@ -68,7 +68,7 @@ int main() {
 
             bool hayDeterminante = false;
 
-    // AQUÍ cambiamos: revisamos columnas de 2 en 2 (c y c+1)
+    // Revisamos columnas de 2 en 2 (c y c+1)
             for (int c = 0; c < columnas - 1; c++) {
                 int a1 = matriz[i][c];
                 int b1 = matriz[k][c];
@@ -82,7 +82,7 @@ int main() {
 
                 if (pat1 || pat2) {
                     hayDeterminante = true;
-                    break;  // ya encontramos, no hace falta seguir
+                    break;  
                 }
             }
 
@@ -106,23 +106,32 @@ int main() {
 
             if (iContieneK && !kContieneI) {
                 basicas[i] = false;
-                break;      // ya no comparo i con más, porque i murió
+                break;      
             } else if (kContieneI && !iContieneK) {
                 basicas[k] = false;
-                // i sigue viva, entonces sigo con el siguiente k
             } 
         }
     }
 
-    // Mostrar la matriz básica (solo filas vivas)
+    // Mostrar la matriz básica y calcular densidad
+    float filas_den=0;
+    float unos=0;
     cout << "\nMatriz basica (filas que sobrevivieron):\n";
     for (int i = 0; i < filas; i++) {
         if (!basicas[i]) continue;
+        filas_den++;
         for (int j = 0; j < columnas; j++) {
+            if(matriz[i][j]==1){
+                unos++;
+            }
             cout << matriz[i][j] << " ";
         }
         cout << endl;
     }
+
+    float densidad;
+    densidad=unos/(filas_den*columnas);
+    cout<<"Densidad: "<<densidad<<endl;
 
     return 0;
 }
