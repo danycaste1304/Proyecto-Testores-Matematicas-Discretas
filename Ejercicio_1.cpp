@@ -129,6 +129,7 @@ int main() {
         cout << endl;
     }
 
+    cout << endl;
     float densidad;
     densidad=unos/(filas_den*columnas);
     cout<<"Densidad: "<<densidad<<endl;
