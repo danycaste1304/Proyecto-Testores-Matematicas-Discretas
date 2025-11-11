@@ -44,7 +44,19 @@ int main() {
         {1, 0, 1, 0, 0, 1},
         {0, 1, 1, 1, 0, 0}
     };
+    
+    /*
+    int filas = 5;
+    int columnas = 4;
 
+   vector<vector<int>> matriz = {
+        {1, 1, 0, 1},
+        {1, 0, 1, 0},
+        {1, 1, 1, 1},
+        {0, 0, 1, 1},
+        {1, 0, 0, 1},
+    };
+    */
 
     // Mostrar la matriz
     cout << "\nMatriz booleana generada aleatoriamente:\n";
