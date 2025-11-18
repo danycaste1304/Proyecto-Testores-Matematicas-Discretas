@@ -47,7 +47,85 @@ int main(){
 
     for (auto &row : B) {
         print_row(row);
+
     }
+
+    int filas = 11;
+    int columnas = 6;
+
+    cout << "\nComprobar que B es MB" << endl;
+    vector<bool> basicas(filas, true);
+
+    // Recorrer cada fila i
+    for (int i = 0; i < filas; i++) {
+
+        //si ya fue eliminada, no la comparamos
+        if (!basicas[i]) continue;
+
+        // la comparamos con las filas que vienen después
+        for (int k = 0; k < filas; k++) {
+            if (!basicas[k]||k==i) continue;
+
+            bool hayDeterminante = false;
+
+    // Revisamos columnas de 2 en 2 (c y c+1)
+            for (int c = 0; c < columnas - 1; c++) {
+                int a1 = B[i][c];
+                int b1 = B[k][c];
+                int a2 = B[i][c+1];
+                int b2 = B[k][c+1];
+
+                // patrón 0,1 seguido de 1,0
+                bool pat1 = (a1 == 0 && b1 == 1) && (a2 == 1 && b2 == 0);
+                // patrón 1,0 seguido de 0,1
+                bool pat2 = (a1 == 1 && b1 == 0) && (a2 == 0 && b2 == 1);
+
+                if (pat1 || pat2) {
+                    hayDeterminante = true;
+                    break;  
+                }
+            }
+
+            if (hayDeterminante) {
+                // no se elimina ninguna de las dos, pero seguimos comparando i con la que sigue
+                continue;
+            }
+           
+            // si NO hay determinante, entonces una contiene a la otra.
+            bool iContieneK = true;
+            bool kContieneI = true;
+
+            for (int c = 0; c < columnas; c++) {
+                if (B[i][c] < B[k][c]) {
+                    iContieneK = false;
+                }
+                if (B[k][c] < B[i][c]) {
+                    kContieneI = false;
+                }
+            }
+
+            if (iContieneK && !kContieneI) {
+                basicas[i] = false;
+                break;      
+            } else if (kContieneI && !iContieneK) {
+                basicas[k] = false;
+            } 
+        }
+    }
+
+    // Mostrar la matriz básica
+    cout << "\nMatriz basica:\n";
+    for (int i = 0; i < filas; i++) {
+        if (!basicas[i]) continue;
+        for (int j = 0; j < columnas; j++) {
+            if(B[i][j]==1){
+            }
+            cout << B[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+
     // Ejecutar BT
     Matrix tipicos = BT(B);
 
@@ -58,6 +136,7 @@ int main(){
     }
     cout<<endl;
 
+    
 }
 
 
@@ -264,5 +343,3 @@ Matrix BT(const Matrix &MB) {
 
     return tipicos;
 }
-
-//Comprobar que B es básica:
