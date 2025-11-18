@@ -8,6 +8,7 @@
 #include <algorithm> 
 #include <utility>
 #include <stdexcept>
+#include <iomanip>  
 using namespace std;
 
 // --------------------------- Tipos y alias ----------------------------------
@@ -24,7 +25,7 @@ vector<vector<int>> ingresoMatrizBasica() {
     int filas, columnas;
     
     // Pedir dimensiones al usuario
-    cout << "-------- Generación de Matriz Booleana --------" << endl;
+    cout << "-------- Generacion de Matriz Booleana --------" << endl;
     cout << "Ingrese el numero de filas (maximo 100): ";
     cin >> filas;
     cout << "Ingrese el numero de columnas (maximo 10): ";
@@ -483,7 +484,9 @@ int main(){
         cout << "\n";
     }
 
-    // TIEMPO
+    // ---------- DECIMALES AUMENTADOS ----------
+    cout << fixed << setprecision(20);   
+
     cout << "\nTiempo de ejecucion: " 
          << tiempo.count() << " segundos.\n";
 
