@@ -4,6 +4,7 @@
 #include <chrono> //Ayuda a calcular el tiempo de ejecución del algoritmo
 #include <algorithm> 
 #include <utility>
+#include <stdexcept>
 using namespace std;
 
 // --------------------------- Tipos y alias ----------------------------------
@@ -13,6 +14,112 @@ using namespace std;
 // - Conjunto de filas MB es vector<vector<int>>
 using Row = vector<int>;
 using Matrix = vector<Row>;
+
+//Interfaz
+vector<vector<int>> ingresoMatrizBasica() {
+
+    int filas, columnas;
+    
+    //Pedir dimensiones
+    cout << "--------Ingreso Matriz Booleana------"<<endl;
+    cout << "Ingrese el numero de filas (maximo 100): ";
+    cin >> filas;
+    cout << "Ingrese el numero de columnas (maximo 10): ";
+    cin >> columnas;
+
+    if (filas <= 0 || filas > 100 || columnas <= 0 || columnas > 10) {
+        throw out_of_range("Error: dimensiones fuera de rango.");
+    }
+
+    //Ingreso de la matriz
+    vector<vector<int>> matriz(filas, vector<int>(columnas));
+
+    cout << "\nIngrese la matriz booleana (" << filas << " x " << columnas << ")\n";
+    cout << "Use solo 0 y 1.\n\n";
+
+    for (int i = 0; i < filas; i++) {
+        cout << "Fila " << i + 1 << " ("<<columnas<<" valores): ";
+        for (int j = 0; j < columnas; j++) {
+            int valor;
+            cin >> valor;
+            while (valor != 0 && valor != 1) {
+                cout << "Valor invalido, ingrese 0 o 1: ";
+                cin >> valor;
+            }
+            matriz[i][j] = valor;
+        }
+    }
+
+    //Mostrar matriz ingresada
+    cout << "\nMatriz booleana ingresada:\n";
+    for (auto &fila : matriz) {
+        for (int x : fila) cout << x << " ";
+        cout << "\n";
+    }
+
+    //Convertir en matriz básica
+    vector<bool> basicas(filas, true);
+
+    for (int i = 0; i < filas; i++) {
+
+        if (!basicas[i]) continue;
+
+        for (int k = 0; k < filas; k++) {
+            if (!basicas[k] || k == i) continue;
+
+            bool hayDet = false;
+
+            // Buscar patrón determinante
+            for (int c = 0; c < columnas - 1; c++) {
+                int a1 = matriz[i][c], a2 = matriz[i][c+1];
+                int b1 = matriz[k][c], b2 = matriz[k][c+1];
+
+                bool pat1 = (a1 == 0 && b1 == 1) && (a2 == 1 && b2 == 0);
+                bool pat2 = (a1 == 1 && b1 == 0) && (a2 == 0 && b2 == 1);
+
+                if (pat1 || pat2) {
+                    hayDet = true;
+                    break;
+                }
+            }
+
+            if (hayDet) continue;
+
+            bool iContieneK = true;
+            bool kContieneI = true;
+
+            for (int c = 0; c < columnas; c++) {
+                if (matriz[i][c] < matriz[k][c]) iContieneK = false;
+                if (matriz[k][c] < matriz[i][c]) kContieneI = false;
+            }
+
+            if (iContieneK && !kContieneI) {
+                basicas[i] = false;
+                break;
+            } 
+            else if (kContieneI && !iContieneK) {
+                basicas[k] = false;
+            }
+        }
+    }
+
+    //Extraer matriz básica
+    vector<vector<int>> matrizBasica;
+
+    cout << "\nMatriz basica resultante:\n";
+    for (int i = 0; i < filas; i++) {
+        if (!basicas[i]) continue;
+
+        matrizBasica.push_back(matriz[i]);
+
+        for (int j = 0; j < columnas; j++)
+            cout << matriz[i][j] << " ";
+
+        cout << "\n";
+    }
+    
+    return matrizBasica;
+}
 
 // ----------------------- Utilidad: imprimir vector --------------------------
 void print_row(const Row &r) {
@@ -316,6 +423,7 @@ Matrix BT(const Matrix &MB) {
 
 int main(){
 
+    /*
     Matrix A = {
         {1,0,1,0,1,0},
         {1,1,0,0,1,0},
@@ -325,8 +433,14 @@ int main(){
         {1,0,1,0,0,1},
         {0,1,1,1,0,0}
     };
+    */
 
-    cout << "Matriz A: " << endl;
+    Matrix A = ingresoMatrizBasica();
+
+    if (A.empty()) {
+        cout << "\nLa matriz basica resultante esta vacia. No se puede ejecutar BT.\n";
+        return 0;
+    }
 
     for (auto &row : A) {
         print_row(row);
