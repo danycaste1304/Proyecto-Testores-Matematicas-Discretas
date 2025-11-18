@@ -47,6 +47,5 @@ int main() {
         }
     }
 
-    // Aquí ya tienes A lista para pasarla a tu código del Ejercicio 1 (MD/MB).
     return 0;
 }
