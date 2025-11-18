@@ -5,7 +5,8 @@
 #include <algorithm> 
 #include <stdexcept>
 #include <cstdlib>  
-#include <ctime>     
+#include <ctime>   
+#include <iomanip>    
 using namespace std;
 using namespace std::chrono;
 
@@ -210,6 +211,8 @@ int main() {
     int columnas = A[0].size();
     
     cout << "\n ----------Testores tipicos por prefijo de filas----------" << endl;
+
+    cout << fixed << setprecision(20); 
 
     auto inicio = high_resolution_clock::now();
 
