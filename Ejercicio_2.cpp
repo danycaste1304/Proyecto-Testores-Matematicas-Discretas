@@ -108,18 +108,14 @@ vector<vector<int>> ingresoMatrizBasica() {
     }
 
     // Mostrar la matriz básica
-    float filas_den = 0;
-    float unos = 0;
     vector<vector<int>> matrizBasica;
 
     cout << "\nMatriz basica:\n";
     for (int i = 0; i < filas; i++) {
         if (!basicas[i]) continue;
-        filas_den++;
         matrizBasica.push_back(matriz[i]);
         for (int j = 0; j < columnas; j++) {
             if (matriz[i][j] == 1) {
-                unos++;
             }
             cout << matriz[i][j] << " ";
         }
