@@ -442,10 +442,11 @@ int main(){
         return 0;
     }
 
+    /*
     for (auto &row : A) {
         print_row(row);
     }
-
+    */
     cout << "\nEjecutando algoritmo...\n\n";
 
     //Inicio de tiempo de ejecución
