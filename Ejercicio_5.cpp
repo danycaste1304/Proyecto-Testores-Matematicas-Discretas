@@ -7,9 +7,10 @@
 #include <chrono> 
 #include <algorithm> 
 #include <utility>
-#include <stdexcept>
 #include <iomanip>  
+#include <cmath> 
 using namespace std;
+using namespace std::chrono;
 
 using Row = vector<int>;
 using Matrix = vector<Row>;
@@ -154,7 +155,100 @@ Matrix ordenarPorUnos(const Matrix& M) {
     return R;
 }
 
+//YYC
+bool esTestor(const Matrix& matriz, const vector<int>& columnas, int filas) {
+    for (int i = 0; i < filas; i++) {
+        for (int j = i + 1; j < filas; j++) {
+            bool diferentes = false;
+            for (int c : columnas) {
+                if (matriz[i][c] != matriz[j][c]) {
+                    diferentes = true;
+                    break;
+                }
+            }
+            if (!diferentes) return false; 
+        }
+    }
+    return true;
+}
 
+void generarCombinaciones(const Matrix& matriz, int filas, int columnasTotales, int r, vector<vector<int>>& testores) {
+    vector<int> comb(r);
+    for (int i = 0; i < r; i++) comb[i] = i;
+
+    while (true) {
+        if (esTestor(matriz, comb, filas)) {
+            bool esMinimo = true;
+            for (const auto& t : testores) {
+                bool subset = true;
+                for (int x : t) {
+                    if (find(comb.begin(), comb.end(), x) == comb.end()) { 
+                        subset = false;
+                        break;
+                    }
+                }
+                if (subset) {
+                    esMinimo = false;
+                    break;
+                }
+            }
+            if (esMinimo) {
+                testores.push_back(comb);
+            }
+        }
+
+        int i;
+        for (i = r - 1; i >= 0; --i) {
+            if (comb[i] != i + columnasTotales - r) break;
+        }
+        if (i < 0) break;
+        comb[i]++;
+        for (int j = i + 1; j < r; j++)
+            comb[j] = comb[j - 1] + 1;
+    }
+}
+
+
+double ejecutarYYC(const Matrix& A) {
+    if (A.empty()) {
+        return 0.0;  // nada que hacer
+    }
+
+    int filas    = (int)A.size();
+    int columnas = (int)A[0].size();
+
+    auto inicio = high_resolution_clock::now();
+
+    // Bucle original sobre k (prefijo de filas)
+    for (int k = 2; k <= filas; k++) {
+        auto t0 = high_resolution_clock::now();
+
+        vector<vector<int>> testores;
+        bool encontrados = false;
+
+        for (int r = 1; r <= columnas; r++) {
+            generarCombinaciones(A, k, columnas, r, testores);
+            if (!testores.empty()) {
+                encontrados = true;
+                break;
+            }
+        }
+
+        auto t1 = high_resolution_clock::now();
+        duration<double> tiempoParcial = t1 - t0;
+        duration<double> tiempoTotal   = t1 - inicio;
+
+        // Ahora solo estamos midiendo el tiempo total (sin cout).
+        (void)tiempoParcial;
+        (void)tiempoTotal;
+        (void)encontrados;
+    }
+
+    auto fin = high_resolution_clock::now();
+    duration<double> total = fin - inicio;
+
+    return total.count();  // tiempo total en segundos
+}
 
 int main(){
     Matrix A = {
