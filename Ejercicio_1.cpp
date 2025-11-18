@@ -5,7 +5,7 @@
 using namespace std;
 
 int main() {
-    /*
+    
     int filas, columnas;
     
     // Pedir dimensiones al usuario
@@ -30,8 +30,8 @@ int main() {
             matriz[i][j] = rand() % 2; // Genera 0 o 1
         }
     }
-    */
-
+    
+    /*
     int filas = 5;
     int columnas = 6;
 
@@ -43,7 +43,7 @@ int main() {
         {0, 0, 1, 0, 1, 0},
     };
     
-    /*
+    
     int filas = 5;
     int columnas = 4;
 
