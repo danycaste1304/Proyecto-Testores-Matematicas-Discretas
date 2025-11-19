@@ -251,10 +251,12 @@ int main() {
     int unos = 0;
     for (auto& fila : A)
         for (int v : fila) if (v == 1) unos++;
+
     double densidad = (double)unos / (filas * columnas);
 
     cout << endl;
+    cout << fixed << setprecision(3);
     cout << "Densidad de la matriz: " << densidad << endl;
-
+    
     return 0;
 }
