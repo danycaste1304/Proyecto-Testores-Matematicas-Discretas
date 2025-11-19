@@ -1,0 +1,28 @@
+# ==== COMPILACIÓN C++ ====
+*.o
+*.out
+*.exe
+*.obj
+*.dll
+*.so
+*.a
+
+# ==== TEMPORALES GENERALES ====
+*.log
+*.tmp
+*.bak
+
+# ==== EDITORES / ENTORNOS ====
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==== SISTEMA OPERATIVO ====
+.DS_Store
+Thumbs.db
+
+# ==== CARPETAS DE BUILD ====
+build/
+bin/
+dist/
