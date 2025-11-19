@@ -31,6 +31,7 @@ int main() {
         }
     }
 
+
     // Mostrar la matriz
     cout << "\nMatriz booleana generada aleatoriamente:\n";
     for (int i = 0; i < filas; i++) {
