@@ -1,14 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
-#include <cmath>
-#include <algorithm> 
-#include <stdexcept>
-#include <cstdlib>  
-#include <ctime>   
-#include <iomanip>    
 using namespace std;
 using namespace std::chrono;
+
+using Matrix = vector<vector<int>>;
 
 vector<vector<int>> ingresoMatrizBasica() {
 
@@ -126,137 +122,219 @@ vector<vector<int>> ingresoMatrizBasica() {
 }
 
 
-bool esTestor(const vector<vector<int>>& matriz, const vector<int>& columnas, int filas) {
-    for (int i = 0; i < filas; i++) {
-        for (int j = i + 1; j < filas; j++) {
-            bool diferentes = false;
-            for (int c : columnas) {
-                if (matriz[i][c] != matriz[j][c]) {
-                    diferentes = true;
-                    break;
-                }
-            }
-            if (!diferentes) return false; 
+//Función suma de filas
+vector<int> sumarFilas(const Matrix &A, const vector<int> &cols, int lastRow) {
+    vector<int> sumas(lastRow + 1, 0);
+
+    for (int i = 0; i <= lastRow; i++) {
+        int suma = 0;
+        for (int j = 0; j < (int)cols.size(); j++) {
+            int c = cols[j];    // índice de columna (0,1,2,...)
+            suma += A[i][c];    // sumo el valor A[i][c]
         }
+        sumas[i] = suma;
     }
-    return true;
+
+    return sumas;
 }
 
-void generarCombinaciones(const vector<vector<int>>& matriz, int filas, int columnasTotales,
-                          int r, vector<vector<int>>& testores) {
-    vector<int> comb(r);
-    for (int i = 0; i < r; i++) comb[i] = i;
 
-    while (true) {
-        if (esTestor(matriz, comb, filas)) {
-            bool esMinimo = true;
-            for (const auto& t : testores) {
-                bool subset = true;
-                for (int x : t) {
-                    if (find(comb.begin(), comb.end(), x) == comb.end()) { 
-                        subset = false;
-                        break;
-                    }
-                }
-                if (subset) {
-                    esMinimo = false;
-                    break;
-                }
-            }
-            if (esMinimo) {
-                testores.push_back(comb);
-            }
+// Condición YYC
+bool condicionYYC(const Matrix &A, const vector<int> &cols, int lastRow) {
+    if (cols.empty()) return false;
+
+    vector<int> sumas = sumarFilas(A, cols, lastRow);
+
+    // Encontrar filas donde la suma es 1
+    vector<int> filasConUno;
+    for (int i = 0; i <= lastRow; i++) {
+        if (sumas[i] == 1) {
+            filasConUno.push_back(i);
         }
-
-        int i;
-        for (i = r - 1; i >= 0; --i) {
-            if (comb[i] != i + columnasTotales - r) break;
-        }
-        if (i < 0) break;
-        comb[i]++;
-        for (int j = i + 1; j < r; j++)
-            comb[j] = comb[j - 1] + 1;
-    }
-}
-
-int main() {
-    // MATRIZ A
-    /*
-    vector<vector<int>> A = {
-        {1, 0, 1, 0, 1, 0},
-        {1, 1, 0, 0, 1, 0},
-        {0, 1, 1, 0, 1, 1},
-        {1, 0, 0, 1, 0, 1},
-        {0, 1, 0, 1, 1, 0},
-        {1, 0, 1, 0, 0, 1},
-        {0, 1, 1, 1, 0, 0}
-    };
-    
-
-    int filas = A.size();
-    int columnas = A[0].size();
-    */
-
-    vector<vector<int>> A = ingresoMatrizBasica();
-    if (A.empty()) {
-        cout << "\nLa matriz basica resultante esta vacia. No se puede ejecutar YYC.\n";
-        return 0;
     }
 
-    int filas = A.size();
-    int columnas = A[0].size();
-    
-    cout << "\n ----------Testores tipicos por prefijo de filas----------" << endl;
+    int numColumnas = cols.size();
 
-    cout << fixed << setprecision(20); 
+    // Condición 1
+    if (numColumnas < (int)filasConUno.size()) {
+        return false;
+    }
 
-    auto inicio = high_resolution_clock::now();
+    // Condición 2: cada columna debe tener al menos un 1 en esas filas
+    for (int k = 0; k < numColumnas; k++) {
+        int columna = cols[k];
+        bool tieneUno = false;
 
-    for (int k = 2; k <= filas; k++) {
-        auto t0 = high_resolution_clock::now();
-
-        vector<vector<int>> testores;
-        bool encontrados = false;
-
-        for (int r = 1; r <= columnas; r++) {
-            generarCombinaciones(A, k, columnas, r, testores);
-            if (!testores.empty()) {
-                encontrados = true;
+        for (int f = 0; f < (int)filasConUno.size(); f++) {
+            int fila = filasConUno[f];
+            if (A[fila][columna] == 1) {
+                tieneUno = true;
                 break;
             }
         }
 
-        auto t1 = high_resolution_clock::now();
-        duration<double> tiempoParcial = t1 - t0;
-        duration<double> tiempoTotal = t1 - inicio;
-
-        cout << "\nFilas consideradas: " << k << endl;
-        cout << "Testores tipicos: ";
-        if (testores.empty()) cout << "(ninguno)";
-        else {
-            for (auto& t : testores) {
-                cout << "{";
-                for (size_t i = 0; i < t.size(); i++) {
-                    cout << t[i];
-                    if (i < t.size() - 1) cout << ",";
-                }
-                cout << "} ";
-            }
+        if (!tieneUno) {
+            return false;
         }
-        cout << "\nTiempo parcial: " << tiempoParcial.count() << " s";
-        cout << "\nTiempo acumulado: " << tiempoTotal.count() << " s\n";
     }
 
-    // Densidad final
-    int unos = 0;
-    for (auto& fila : A)
-        for (int v : fila) if (v == 1) unos++;
+    return true;
+}
 
-    double densidad = (double)unos / (filas * columnas);
+// Función auxiliar: ordenar un vector de forma sencilla
+void ordenarVector(vector<int> &v) {
+    int n = v.size();
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (v[j] < v[i]) {
+                int temp = v[i];
+                v[i] = v[j];
+                v[j] = temp;
+            }
+        }
+    }
+}
 
-    cout << endl;
-    cout << fixed << setprecision(3);
-    cout << "Densidad de la matriz: " << densidad << endl;
+//Verificar si un testor contiene una columna
+bool testorContieneColumna(const vector<int> &t, int col) {
+    for (int i = 0; i < (int)t.size(); i++) {
+        if (t[i] == col) return true;
+    }
+    return false;
+}
+
+// Comparar dos testores
+bool sonIguales(const vector<int> &a, const vector<int> &b) {
+    if (a.size() != b.size()) return false;
+    for (int i = 0; i < (int)a.size(); i++) {
+        if (a[i] != b[i]) return false;
+    }
+    return true;
+}
+
+// Verificar si un testor ya está en la lista
+bool yaExisteTestor(const vector<vector<int>> &lista, const vector<int> &t) {
+    for (int i = 0; i < (int)lista.size(); i++) {
+        if (sonIguales(lista[i], t)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Imprimir testores
+void imprimirTestores(const vector<vector<int>> &testores) {
+    if (testores.empty()) {
+        cout << "(ninguno)";
+        return;
+    }
+
+    for (int i = 0; i < (int)testores.size(); i++) {
+        cout << "{";
+        for (int j = 0; j < (int)testores[i].size(); j++) {
+            cout << testores[i][j] + 1;  // +1 para notación humana
+            if (j < (int)testores[i].size() - 1) cout << ",";
+        }
+        cout << "} ";
+    }
+}
+
+//Main
+int main() {
+    Matrix A = ingresoMatrizBasica();
+
+    int filas = A.size();
+    if (filas == 0) return 0;
+    int columnas = A[0].size();
+
+    // Tiempo total desde el inicio
+    auto inicioGlobal = high_resolution_clock::now();
+
+    vector<vector<int>> testores;
+
+    // PRIMERA FILA
+    for (int j = 0; j < columnas; j++) {
+        if (A[0][j] == 1) {
+            vector<int> t;
+            t.push_back(j);
+            testores.push_back(t);
+        }
+    }
     
+    cout << "\nYYC\n";
+    cout << "Fila considerada: 1\n";
+    cout << "Testores tipicos (solo primera fila): ";
+    imprimirTestores(testores);
+    cout << "\n";
+    
+    auto t1 = high_resolution_clock::now();
+    duration<double> total1 = t1 - inicioGlobal;
+    cout << "Tiempo acumulado: " << total1.count() << " s\n\n";
+
+
+    // RESTO DE FILAS
+    for (int i = 1; i < filas; i++) {
+
+        auto t0 = high_resolution_clock::now(); // tiempo parcial
+
+        vector<vector<int>> nuevosTestores;
+
+        for (int ti = 0; ti < (int)testores.size(); ti++) {
+            vector<int> t = testores[ti];
+            bool seMantiene = false;
+
+            for (int k = 0; k < (int)t.size(); k++) {
+                int col = t[k];
+                if (A[i][col] == 1) {
+                    seMantiene = true;
+                    break;
+                }
+            }
+
+            if (seMantiene) {
+                if (!yaExisteTestor(nuevosTestores, t)) {
+                    nuevosTestores.push_back(t);
+                }
+            } else {
+                for (int j = 0; j < columnas; j++) {
+                    if (A[i][j] == 1) {
+                        vector<int> combinado = t;
+
+                        if (!testorContieneColumna(combinado, j)) {
+                            combinado.push_back(j);
+                        }
+
+                        ordenarVector(combinado);
+
+                        if (condicionYYC(A, combinado, i)) {
+                            if (!yaExisteTestor(nuevosTestores, combinado)) {
+                                nuevosTestores.push_back(combinado);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        testores = nuevosTestores;
+
+        auto t1 = high_resolution_clock::now();
+        duration<double> tiempoParcial = t1 - t0;
+        duration<double> tiempoTotal   = t1 - inicioGlobal;
+
+        cout << "Fila considerada: " << (i + 1) << "\n";
+        cout << "Testores tipicos hasta esta fila: ";
+        imprimirTestores(testores);
+        cout << "\n";
+
+        cout << "Tiempo parcial: " << tiempoParcial.count() << " s\n";
+        cout << "Tiempo acumulado: " << tiempoTotal.count() << " s\n\n";
+    }
+
+    // RESULTADO FINAL
+    cout << "==== Testores tipicos finales ====\n";
+    imprimirTestores(testores);
+    cout << "\n";
+
     return 0;
 }
