@@ -157,100 +157,178 @@ Matrix ordenarPorUnos(const Matrix& M) {
     return R;
 }
 
-//------------YYC-------------------
-bool esTestor(const Matrix& matriz, const vector<int>& columnas, int filas) {
-    for (int i = 0; i < filas; i++) {
-        for (int j = i + 1; j < filas; j++) {
-            bool diferentes = false;
-            for (int c : columnas) {
-                if (matriz[i][c] != matriz[j][c]) {
-                    diferentes = true;
-                    break;
-                }
-            }
-            if (!diferentes) return false; 
+//======================= FUNCIONES YYC =========================
+
+//Función suma de filas
+vector<int> sumarFilas(const Matrix &A, const vector<int> &cols, int lastRow) {
+    vector<int> sumas(lastRow + 1, 0);
+
+    for (int i = 0; i <= lastRow; i++) {
+        int suma = 0;
+        for (int j = 0; j < (int)cols.size(); j++) {
+            int c = cols[j];    // índice de columna (0,1,2,...)
+            suma += A[i][c];    // sumo el valor A[i][c]
         }
+        sumas[i] = suma;
     }
-    return true;
+
+    return sumas;
 }
 
-void generarCombinaciones(const Matrix& matriz, int filas, int columnasTotales, int r, vector<vector<int>>& testores) {
-    vector<int> comb(r);
-    for (int i = 0; i < r; i++) comb[i] = i;
+// Condición YYC
+bool condicionYYC(const Matrix &A, const vector<int> &cols, int lastRow) {
+    if (cols.empty()) return false;
 
-    while (true) {
-        if (esTestor(matriz, comb, filas)) {
-            bool esMinimo = true;
-            for (const auto& t : testores) {
-                bool subset = true;
-                for (int x : t) {
-                    if (find(comb.begin(), comb.end(), x) == comb.end()) { 
-                        subset = false;
-                        break;
-                    }
-                }
-                if (subset) {
-                    esMinimo = false;
-                    break;
-                }
-            }
-            if (esMinimo) {
-                testores.push_back(comb);
-            }
+    vector<int> sumas = sumarFilas(A, cols, lastRow);
+
+    // Encontrar filas donde la suma es 1
+    vector<int> filasConUno;
+    for (int i = 0; i <= lastRow; i++) {
+        if (sumas[i] == 1) {
+            filasConUno.push_back(i);
         }
-
-        int i;
-        for (i = r - 1; i >= 0; --i) {
-            if (comb[i] != i + columnasTotales - r) break;
-        }
-        if (i < 0) break;
-        comb[i]++;
-        for (int j = i + 1; j < r; j++)
-            comb[j] = comb[j - 1] + 1;
-    }
-}
-
-
-double ejecutarYYC(const Matrix& A) {
-    if (A.empty()) {
-        return 0.0;  // nada que hacer
     }
 
-    int filas    = (int)A.size();
-    int columnas = (int)A[0].size();
+    int numColumnas = cols.size();
 
-    auto inicio = high_resolution_clock::now();
+    // Condición 1
+    if (numColumnas < (int)filasConUno.size()) {
+        return false;
+    }
 
-    // Bucle original sobre k (prefijo de filas)
-    for (int k = 2; k <= filas; k++) {
-        auto t0 = high_resolution_clock::now();
+    // Condición 2: cada columna debe tener al menos un 1 en esas filas
+    for (int k = 0; k < numColumnas; k++) {
+        int columna = cols[k];
+        bool tieneUno = false;
 
-        vector<vector<int>> testores;
-        bool encontrados = false;
-
-        for (int r = 1; r <= columnas; r++) {
-            generarCombinaciones(A, k, columnas, r, testores);
-            if (!testores.empty()) {
-                encontrados = true;
+        for (int f = 0; f < (int)filasConUno.size(); f++) {
+            int fila = filasConUno[f];
+            if (A[fila][columna] == 1) {
+                tieneUno = true;
                 break;
             }
         }
 
-        auto t1 = high_resolution_clock::now();
-        duration<double> tiempoParcial = t1 - t0;
-        duration<double> tiempoTotal   = t1 - inicio;
-
-        // Ahora solo estamos midiendo el tiempo total (sin cout).
-        (void)tiempoParcial;
-        (void)tiempoTotal;
-        (void)encontrados;
+        if (!tieneUno) {
+            return false;
+        }
     }
 
-    auto fin = high_resolution_clock::now();
-    duration<double> total = fin - inicio;
-
-    return total.count();  // tiempo total en segundos
+    return true;
 }
+
+// Función auxiliar: ordenar un vector de forma sencilla
+void ordenarVector(vector<int> &v) {
+    int n = v.size();
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (v[j] < v[i]) {
+                int temp = v[i];
+                v[i] = v[j];
+                v[j] = temp;
+            }
+        }
+    }
+}
+
+//Verificar si un testor contiene una columna
+bool testorContieneColumna(const vector<int> &t, int col) {
+    for (int i = 0; i < (int)t.size(); i++) {
+        if (t[i] == col) return true;
+    }
+    return false;
+}
+
+// Comparar dos testores
+bool sonIguales(const vector<int> &a, const vector<int> &b) {
+    if (a.size() != b.size()) return false;
+    for (int i = 0; i < (int)a.size(); i++) {
+        if (a[i] != b[i]) return false;
+    }
+    return true;
+}
+
+// Verificar si un testor ya está en la lista
+bool yaExisteTestor(const vector<vector<int>> &lista, const vector<int> &t) {
+    for (int i = 0; i < (int)lista.size(); i++) {
+        if (sonIguales(lista[i], t)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+// FUNCIÓN QUE EJECUTA YYC
+
+double ejecutarYYC(const Matrix &A) {
+    int filas = A.size();
+    if (filas == 0) return 0.0;
+    int columnas = A[0].size();
+
+    auto inicioGlobal = high_resolution_clock::now();
+
+    vector<vector<int>> testores;
+
+    // PRIMERA FILA
+    for (int j = 0; j < columnas; j++) {
+        if (A[0][j] == 1) {
+            vector<int> t;
+            t.push_back(j);
+            testores.push_back(t);
+        }
+    }
+
+    // RESTO DE FILAS
+    for (int i = 1; i < filas; i++) {
+
+        vector<vector<int>> nuevosTestores;
+
+        for (int ti = 0; ti < (int)testores.size(); ti++) {
+            vector<int> t = testores[ti];
+            bool seMantiene = false;
+
+            for (int k = 0; k < (int)t.size(); k++) {
+                int col = t[k];
+                if (A[i][col] == 1) {
+                    seMantiene = true;
+                    break;
+                }
+            }
+
+            if (seMantiene) {
+                if (!yaExisteTestor(nuevosTestores, t)) {
+                    nuevosTestores.push_back(t);
+                }
+            } else {
+                for (int j = 0; j < columnas; j++) {
+                    if (A[i][j] == 1) {
+                        vector<int> combinado = t;
+
+                        if (!testorContieneColumna(combinado, j)) {
+                            combinado.push_back(j);
+                        }
+
+                        ordenarVector(combinado);
+
+                        if (condicionYYC(A, combinado, i)) {
+                            if (!yaExisteTestor(nuevosTestores, combinado)) {
+                                nuevosTestores.push_back(combinado);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        testores = nuevosTestores;
+    }
+
+    auto finGlobal = high_resolution_clock::now();
+    duration<double> tiempoTotalGlobal = finGlobal - inicioGlobal;
+    return tiempoTotalGlobal.count();
+}
+
 
 //----------BT-----------
 
