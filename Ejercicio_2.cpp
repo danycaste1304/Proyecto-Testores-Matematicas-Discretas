@@ -241,6 +241,18 @@ void imprimirTestores(const vector<vector<int>> &testores) {
 
 //Main
 int main() {
+
+     /*
+    Matrix A = {
+        {1,0,1,0,1,0},
+        {1,1,0,0,1,0},
+        {0,1,1,0,1,1},
+        {1,0,0,1,0,1},
+        {0,1,0,1,1,0},
+        {1,0,1,0,0,1},
+        {0,1,1,1,0,0}
+    };
+    */
     Matrix A = ingresoMatrizBasica();
 
     int filas = A.size();
