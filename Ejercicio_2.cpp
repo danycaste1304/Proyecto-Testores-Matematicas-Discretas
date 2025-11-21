@@ -1,12 +1,12 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
 using namespace std;
+using namespace std::chrono;
 
 using Matrix = vector<vector<int>>;
 
-// ---------------------------------------------------------------------
-// Suma de filas desde fila 0 hasta lastRow, considerando solo columnas "cols"
-// ---------------------------------------------------------------------
+//Función suma de filas
 vector<int> sumarFilas(const Matrix &A, const vector<int> &cols, int lastRow) {
     vector<int> sumas(lastRow + 1, 0);
 
@@ -22,11 +22,8 @@ vector<int> sumarFilas(const Matrix &A, const vector<int> &cols, int lastRow) {
     return sumas;
 }
 
-// ---------------------------------------------------------------------
-// Condición YYC:
-// 1) #columnas >= #filas con suma == 1
-// 2) cada columna tiene al menos un 1 en esas filas
-// ---------------------------------------------------------------------
+
+// Condición YYC
 bool condicionYYC(const Matrix &A, const vector<int> &cols, int lastRow) {
     if (cols.empty()) return false;
 
@@ -68,9 +65,7 @@ bool condicionYYC(const Matrix &A, const vector<int> &cols, int lastRow) {
     return true;
 }
 
-// ---------------------------------------------------------------------
-// Función auxiliar: ordenar un vector de forma sencilla (burbuja)
-// ---------------------------------------------------------------------
+// Función auxiliar: ordenar un vector de forma sencilla
 void ordenarVector(vector<int> &v) {
     int n = v.size();
     for (int i = 0; i < n; i++) {
@@ -84,9 +79,7 @@ void ordenarVector(vector<int> &v) {
     }
 }
 
-// ---------------------------------------------------------------------
-// Función auxiliar: verificar si un testor contiene una columna
-// ---------------------------------------------------------------------
+//Verificar si un testor contiene una columna
 bool testorContieneColumna(const vector<int> &t, int col) {
     for (int i = 0; i < (int)t.size(); i++) {
         if (t[i] == col) return true;
@@ -94,9 +87,7 @@ bool testorContieneColumna(const vector<int> &t, int col) {
     return false;
 }
 
-// ---------------------------------------------------------------------
-// Función auxiliar: comparar dos testores (mismo tamaño y mismos elementos)
-// ---------------------------------------------------------------------
+// Comparar dos testores
 bool sonIguales(const vector<int> &a, const vector<int> &b) {
     if (a.size() != b.size()) return false;
     for (int i = 0; i < (int)a.size(); i++) {
@@ -105,9 +96,7 @@ bool sonIguales(const vector<int> &a, const vector<int> &b) {
     return true;
 }
 
-// ---------------------------------------------------------------------
-// Verificar si un testor ya está en la lista (para no duplicar)
-// ---------------------------------------------------------------------
+// Verificar si un testor ya está en la lista
 bool yaExisteTestor(const vector<vector<int>> &lista, const vector<int> &t) {
     for (int i = 0; i < (int)lista.size(); i++) {
         if (sonIguales(lista[i], t)) {
@@ -117,10 +106,7 @@ bool yaExisteTestor(const vector<vector<int>> &lista, const vector<int> &t) {
     return false;
 }
 
-// ---------------------------------------------------------------------
-// Imprimir todos los testores con notación de conjuntos {1,2,3}
-// (Aquí sumamos +1 para que las columnas se vean desde 1 en vez de 0)
-// ---------------------------------------------------------------------
+// Imprimir testores
 void imprimirTestores(const vector<vector<int>> &testores) {
     if (testores.empty()) {
         cout << "(ninguno)";
@@ -137,51 +123,60 @@ void imprimirTestores(const vector<vector<int>> &testores) {
     }
 }
 
-// ---------------------------------------------------------------------
-// MAIN: implementación simple del algoritmo YYC como lo describiste
-// ---------------------------------------------------------------------
+//Main
 int main() {
-    // EJEMPLO de matriz A (puedes reemplazarla por tu matriz)
     Matrix A = {
-        {1,0,1,0},
-        {0,1,1,0},
-        {1,1,0,1}
+        {1,0,1,0,1,0},
+        {1,1,0,0,1,0},
+        {0,1,1,0,1,1},
+        {1,0,0,1,0,1},
+        {0,1,0,1,1,0},
+        {1,0,1,0,0,1},
+        {0,1,1,1,0,0}
     };
 
     int filas = A.size();
     if (filas == 0) return 0;
     int columnas = A[0].size();
 
-    vector<vector<int>> testores; // cada testor es un vector de columnas (0-based)
+    // Tiempo total desde el inicio
+    auto inicioGlobal = high_resolution_clock::now();
 
-    // =========================
-    // 1) PRIMERA FILA
-    // =========================
+    vector<vector<int>> testores;
+
+    // ===============================
+    // PRIMERA FILA (SIN TIEMPO PARCIAL)
+    // ===============================
     for (int j = 0; j < columnas; j++) {
         if (A[0][j] == 1) {
             vector<int> t;
-            t.push_back(j);  // guardamos el índice de la columna (0-based)
+            t.push_back(j);
             testores.push_back(t);
         }
     }
 
-    cout << "Fila considerada: 1" << endl;
-    cout << "Testores tipicos (solo primera fila): ";
+    cout << "Fila considerada: 1\n";
+    cout << "Testores típicos (solo primera fila): ";
     imprimirTestores(testores);
-    cout << endl << endl;
+    cout << "\n";
+    
+    auto t1 = high_resolution_clock::now();
+    duration<double> total1 = t1 - inicioGlobal;
+    cout << "Tiempo acumulado: " << total1.count() << " s\n\n";
 
-    // =========================
-    // 2) RESTO DE FILAS (YYC)
-    // =========================
-    for (int i = 1; i < filas; i++) {  // i = 1 corresponde a la fila 2
+    // ===============================
+    // RESTO DE FILAS
+    // ===============================
+    for (int i = 1; i < filas; i++) {
+
+        auto t0 = high_resolution_clock::now(); // tiempo parcial
+
         vector<vector<int>> nuevosTestores;
 
-        // Para cada testor actual
-        for (int tIndex = 0; tIndex < (int)testores.size(); tIndex++) {
-            vector<int> t = testores[tIndex];
+        for (int ti = 0; ti < (int)testores.size(); ti++) {
+            vector<int> t = testores[ti];
             bool seMantiene = false;
 
-            // Verificamos si hay al menos un 1 debajo de alguna columna del testor
             for (int k = 0; k < (int)t.size(); k++) {
                 int col = t[k];
                 if (A[i][col] == 1) {
@@ -191,13 +186,10 @@ int main() {
             }
 
             if (seMantiene) {
-                // El testor se mantiene tal cual
                 if (!yaExisteTestor(nuevosTestores, t)) {
                     nuevosTestores.push_back(t);
                 }
             } else {
-                // No hay 1 en esta fila para las columnas del testor
-                // combinamos con cada columna que tenga 1 en la fila i
                 for (int j = 0; j < columnas; j++) {
                     if (A[i][j] == 1) {
                         vector<int> combinado = t;
@@ -206,10 +198,8 @@ int main() {
                             combinado.push_back(j);
                         }
 
-                        // Ordenamos el testor para tener un orden consistente
                         ordenarVector(combinado);
 
-                        // Aplicamos la condición YYC usando filas desde 0 hasta i
                         if (condicionYYC(A, combinado, i)) {
                             if (!yaExisteTestor(nuevosTestores, combinado)) {
                                 nuevosTestores.push_back(combinado);
@@ -220,21 +210,25 @@ int main() {
             }
         }
 
-        // Actualizamos la lista de testores típicos con los nuevos
         testores = nuevosTestores;
 
-        cout << "Fila considerada: " << (i + 1) << endl;
-        cout << "Testores tipicos hasta esta fila: ";
+        auto t1 = high_resolution_clock::now();
+        duration<double> tiempoParcial = t1 - t0;
+        duration<double> tiempoTotal   = t1 - inicioGlobal;
+
+        cout << "Fila considerada: " << (i + 1) << "\n";
+        cout << "Testores típicos hasta esta fila: ";
         imprimirTestores(testores);
-        cout << endl << endl;
+        cout << "\n";
+
+        cout << "Tiempo parcial: " << tiempoParcial.count() << " s\n";
+        cout << "Tiempo acumulado: " << tiempoTotal.count() << " s\n\n";
     }
 
-    // =========================
-    // 3) RESULTADO FINAL
-    // =========================
-    cout << "==== Testores tipicos finales (despues de la ultima fila) ====" << endl;
+    // RESULTADO FINAL
+    cout << "==== Testores típicos finales ====\n";
     imprimirTestores(testores);
-    cout << endl;
+    cout << "\n";
 
     return 0;
 }
