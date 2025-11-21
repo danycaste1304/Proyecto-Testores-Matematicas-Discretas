@@ -6,6 +6,122 @@ using namespace std::chrono;
 
 using Matrix = vector<vector<int>>;
 
+vector<vector<int>> ingresoMatrizBasica() {
+
+    int filas, columnas;
+    
+    // Pedir dimensiones al usuario
+    cout << "-------- Generacion de Matriz Booleana --------" << endl;
+    cout << "Ingrese el numero de filas (maximo 100): ";
+    cin >> filas;
+    cout << "Ingrese el numero de columnas (maximo 10): ";
+    cin >> columnas;
+
+    // Validar límites
+    if (filas <= 0 || filas > 100 || columnas <= 0 || columnas > 10) {
+        throw out_of_range("Error: dimensiones fuera de rango.");
+    }
+
+    // Semilla aleatoria para que los resultados cambien cada vez
+    srand(time(nullptr));
+
+    // Crear y llenar la matriz booleana
+    vector<vector<int>> matriz(filas, vector<int>(columnas));
+
+    for (int i = 0; i < filas; i++) {
+        for (int j = 0; j < columnas; j++) {
+            matriz[i][j] = rand() % 2; // Genera 0 o 1
+        }
+    }
+
+    // Mostrar la matriz booleana generada
+    cout << "\nMatriz booleana generada aleatoriamente:\n";
+    for (int i = 0; i < filas; i++) {
+        for (int j = 0; j < columnas; j++) {
+            cout << matriz[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    // Convertir en matriz básica
+    vector<bool> basicas(filas, true);
+
+    // Recorrer cada fila i
+    for (int i = 0; i < filas; i++) {
+
+        // Si ya fue eliminada, no la comparamos
+        if (!basicas[i]) continue;
+
+        // La comparamos con todas las demás filas
+        for (int k = 0; k < filas; k++) {
+            if (!basicas[k] || k == i) continue;
+
+            bool hayDeterminante = false;
+
+            // Revisamos columnas de 2 en 2 (c y c+1)
+            for (int c = 0; c < columnas - 1; c++) {
+                int a1 = matriz[i][c];
+                int b1 = matriz[k][c];
+                int a2 = matriz[i][c+1];
+                int b2 = matriz[k][c+1];
+
+                // patrón 0,1 seguido de 1,0
+                bool pat1 = (a1 == 0 && b1 == 1) && (a2 == 1 && b2 == 0);
+                // patrón 1,0 seguido de 0,1
+                bool pat2 = (a1 == 1 && b1 == 0) && (a2 == 0 && b2 == 1);
+
+                if (pat1 || pat2) {
+                    hayDeterminante = true;
+                    break;
+                }
+            }
+
+            if (hayDeterminante) {
+                // no se elimina ninguna de las dos, pero seguimos comparando i con la que sigue
+                continue;
+            }
+
+            // si NO hay determinante, entonces una contiene a la otra.
+            bool iContieneK = true;
+            bool kContieneI = true;
+
+            for (int c = 0; c < columnas; c++) {
+                if (matriz[i][c] < matriz[k][c]) {
+                    iContieneK = false;
+                }
+                if (matriz[k][c] < matriz[i][c]) {
+                    kContieneI = false;
+                }
+            }
+
+            if (iContieneK && !kContieneI) {
+                basicas[i] = false;
+                break;
+            } else if (kContieneI && !iContieneK) {
+                basicas[k] = false;
+            }
+        }
+    }
+
+    // Mostrar la matriz básica
+    vector<vector<int>> matrizBasica;
+
+    cout << "\nMatriz basica:\n";
+    for (int i = 0; i < filas; i++) {
+        if (!basicas[i]) continue;
+        matrizBasica.push_back(matriz[i]);
+        for (int j = 0; j < columnas; j++) {
+            if (matriz[i][j] == 1) {
+            }
+            cout << matriz[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    return matrizBasica;
+}
+
+
 //Función suma de filas
 vector<int> sumarFilas(const Matrix &A, const vector<int> &cols, int lastRow) {
     vector<int> sumas(lastRow + 1, 0);
@@ -125,15 +241,7 @@ void imprimirTestores(const vector<vector<int>> &testores) {
 
 //Main
 int main() {
-    Matrix A = {
-        {1,0,1,0,1,0},
-        {1,1,0,0,1,0},
-        {0,1,1,0,1,1},
-        {1,0,0,1,0,1},
-        {0,1,0,1,1,0},
-        {1,0,1,0,0,1},
-        {0,1,1,1,0,0}
-    };
+    Matrix A = ingresoMatrizBasica();
 
     int filas = A.size();
     if (filas == 0) return 0;
@@ -144,9 +252,7 @@ int main() {
 
     vector<vector<int>> testores;
 
-    // ===============================
-    // PRIMERA FILA (SIN TIEMPO PARCIAL)
-    // ===============================
+    // PRIMERA FILA
     for (int j = 0; j < columnas; j++) {
         if (A[0][j] == 1) {
             vector<int> t;
@@ -154,9 +260,10 @@ int main() {
             testores.push_back(t);
         }
     }
-
+    
+    cout << "\nYYC\n";
     cout << "Fila considerada: 1\n";
-    cout << "Testores típicos (solo primera fila): ";
+    cout << "Testores tipicos (solo primera fila): ";
     imprimirTestores(testores);
     cout << "\n";
     
@@ -164,9 +271,8 @@ int main() {
     duration<double> total1 = t1 - inicioGlobal;
     cout << "Tiempo acumulado: " << total1.count() << " s\n\n";
 
-    // ===============================
+
     // RESTO DE FILAS
-    // ===============================
     for (int i = 1; i < filas; i++) {
 
         auto t0 = high_resolution_clock::now(); // tiempo parcial
@@ -217,7 +323,7 @@ int main() {
         duration<double> tiempoTotal   = t1 - inicioGlobal;
 
         cout << "Fila considerada: " << (i + 1) << "\n";
-        cout << "Testores típicos hasta esta fila: ";
+        cout << "Testores tipicos hasta esta fila: ";
         imprimirTestores(testores);
         cout << "\n";
 
@@ -226,7 +332,7 @@ int main() {
     }
 
     // RESULTADO FINAL
-    cout << "==== Testores típicos finales ====\n";
+    cout << "==== Testores tipicos finales ====\n";
     imprimirTestores(testores);
     cout << "\n";
 
