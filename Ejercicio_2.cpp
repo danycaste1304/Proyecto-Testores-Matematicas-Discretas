@@ -232,7 +232,7 @@ void imprimirTestores(const vector<vector<int>> &testores) {
     for (int i = 0; i < (int)testores.size(); i++) {
         cout << "{";
         for (int j = 0; j < (int)testores[i].size(); j++) {
-            cout << testores[i][j] + 1;  // +1 para notación humana
+            cout << testores[i][j]; 
             if (j < (int)testores[i].size() - 1) cout << ",";
         }
         cout << "} ";
