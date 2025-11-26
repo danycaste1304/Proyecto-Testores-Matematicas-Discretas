@@ -437,20 +437,19 @@ Matrix BT(const Matrix &MB) {
 
 int main(){
 
-    /*
     Matrix A = {
-        {1,0,1,0,1,0},
-        {1,1,0,0,1,0},
-        {0,1,1,0,1,1},
-        {1,0,0,1,0,1},
-        {0,1,0,1,1,0},
-        {1,0,1,0,0,1},
-        {0,1,1,1,0,0}
+        {1,1,0,0,0,0},
+        {0,1,1,0,0,0},
+        {1,0,0,1,0,0},
+        {1,0,0,0,1,0},
+        {0,0,1,0,1,0},
+        {1,0,0,0,0,1},
+        {0,0,1,1,0,1}
     };
-    */
-
+    
+    /*
     Matrix A = ingresoMatrizBasica();
-
+    */
     if (A.empty()) {
         cout << "\nLa matriz basica resultante esta vacia. No se puede ejecutar BT.\n";
         return 0;
